@@ -1,0 +1,16 @@
+{
+  "name": "support-gbk",
+  "main": "./lib/support-gbk",
+  "version": "0.0.0",
+  "description": "Support non-UTF-8 encoding files",
+  "activationEvents": [],
+  "repository": "https://github.com/atom/support-gbk",
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "dependencies": {
+    "chardet":"*",
+    "iconv-lite":"*"
+  }
+}
