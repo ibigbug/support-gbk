@@ -15,6 +15,8 @@ module.exports =
 handleBuffer = (editorView) ->
   editor = editorView.getEditor()
   path = editor.getPath()
+  return if not path
+  
   encoding = chardet.detectFileSync(path)
   console.log('Read file with encoding: ' + encoding)
   converted = iconv.decode(fs.readFileSync(path), encoding)
