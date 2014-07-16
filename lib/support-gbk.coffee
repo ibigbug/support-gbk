@@ -16,26 +16,43 @@ handleBuffer = (editorView) ->
   editor = editorView.getEditor()
   path = editor.getPath()
   return if not path
-  
+
   encoding = chardet.detectFileSync(path)
-  console.log('Read file with encoding: ' + encoding)
-  converted = iconv.decode(fs.readFileSync(path), encoding)
-
   buffer = editor.getBuffer()
-  buffer.setText(converted)
-  buffer.save()
 
-  buffer.on 'saved', () ->
-    saveBufferWithEncoding(path, buffer, encoding)
-    buffer.off 'saved'
-    handleBuffer(editorView)
+  refreshEditor(editor)
 
-  buffer.on 'destroyed', ->
+  buffer.on 'reloaded', ()->
+    refreshEditor(editor)
+
+  buffer.on 'saved', ()->
+    saveEditor(editor, encoding)
+
+  buffer.on 'destroyed', ()->
+    buffer.off 'reloaded'
     buffer.off 'saved'
     buffer.off 'destroyed'
-    saveBufferWithEncoding(path, buffer, encoding)
+    saveEditor(editor, encoding)
 
 
-saveBufferWithEncoding = (path, buffer, encoding) ->
-  buff = iconv.encode(buffer.getText(), encoding)
+saveEditor = (editor, encoding)->
+  path = editor.getPath()
+  return if not path
+  buff = iconv.encode(editor.getText(), encoding)
+  console.log('Saving file with encoding: ' + encoding)
   fs.writeFileSync(path, buff)
+
+
+refreshEditor = (editor) ->
+  buffer = editor.getBuffer()
+  path = editor.getPath()
+  return if not path
+
+  encoding = chardet.detectFileSync(path)
+  console.log('Loading file with encoding: ' + encoding)
+  converted = iconv.decode(fs.readFileSync(path), encoding)
+
+  buffer.on 'contents-conflicted', ()->
+    return true
+  buffer.setText(converted)
+  buffer.off 'contents-conflicted'
