@@ -8,8 +8,8 @@ module.exports =
     @convert()
 
   convert: ->
-    atom.workspaceView.eachEditorView (editorView) ->
-      handleBuffer(editorView)
+    editorViews = atom.workspace.getTextEditors
+    handleBuffer for editorView in editorViews
 
 
 handleBuffer = (editorView) ->
@@ -22,13 +22,14 @@ handleBuffer = (editorView) ->
 
   refreshEditor(editor)
 
-  buffer.on 'reloaded', ()->
+  buffer.onDidReload ()->
     refreshEditor(editor)
 
-  buffer.on 'saved', ()->
+  buffer.onDidSave ()->
     saveEditor(editor, encoding)
 
-  buffer.on 'destroyed', ()->
+
+  buffer.onDidDestroy ()->
     buffer.off 'reloaded'
     buffer.off 'saved'
     buffer.off 'destroyed'
@@ -52,7 +53,6 @@ refreshEditor = (editor) ->
   console.log('Loading file with encoding: ' + encoding)
   converted = iconv.decode(fs.readFileSync(path), encoding)
 
-  buffer.on 'contents-conflicted', ()->
+  buffer.onDidConflict ()->
     return true
   buffer.setText(converted)
-  buffer.off 'contents-conflicted'
